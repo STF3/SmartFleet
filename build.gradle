@@ -5,3 +5,35 @@
  * Learn more about Gradle by exploring our Samples at https://docs.gradle.org/8.10/samples
  * This project uses @Incubating APIs which are subject to change.
  */
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.2' apply false
+    id 'io.spring.dependency-management' version '1.1.6' apply false
+}
+
+allprojects {
+    group = 'com.smartfleet'
+    version = '1.0.0'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'org.springframework.boot'
+
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
