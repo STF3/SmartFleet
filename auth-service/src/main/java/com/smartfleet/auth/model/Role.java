@@ -1,4 +1,5 @@
 package com.smartfleet.auth.model;
 
-public class Role {
+public enum Role {
+    DISPATCHER, ADMIN, DRIVER
 }
