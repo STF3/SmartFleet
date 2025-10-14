@@ -8,7 +8,7 @@
 
 rootProject.name = 'SmartFleet'
 
-include (
+include(
         'common-lib',
         'auth-service',
         'fleet-service',
@@ -17,3 +17,6 @@ include (
         'analytics-service',
         'gateway-service'
 )
+
+include 'common-lib'
+include 'auth-service'
