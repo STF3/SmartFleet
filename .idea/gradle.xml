@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/common-lib" />
             <option value="$PROJECT_DIR$/delivery-service" />
             <option value="$PROJECT_DIR$/fleet-service" />
+            <option value="$PROJECT_DIR$/gateway-service" />
             <option value="$PROJECT_DIR$/tracking-service" />
           </set>
         </option>
