@@ -11,11 +11,11 @@ rootProject.name = 'SmartFleet'
 include(
         'common-lib',
         'auth-service',
-        'fleet-service',
-        'delivery-service',
-        'tracking-service',
-        'analytics-service',
-        'gateway-service'
+//        'fleet-service',
+//        'delivery-service',
+//        'tracking-service',
+//        'analytics-service',
+//        'gateway-service'
 )
 
 include 'common-lib'
