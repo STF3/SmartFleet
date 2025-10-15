@@ -4,6 +4,11 @@ plugins {
     id 'java'
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
 dependencies {
     implementation project(':common-lib')
     implementation 'org.springframework.boot:spring-boot-starter-web'
