@@ -41,4 +41,19 @@ public class AuthService {
         return generateTokens(refreshToken.getUser());
     }
 
+    public Map<String, String> generateTokens(User user) {
+        String accessToken = jwtService.generateToken(String.valueOf(user.getEmail()),
+                Map.of("role", user.getRole().name()));
+        String refreshToken = UUID.randomUUID().toString();
+
+        refreshTokenRepository.deleteByUser(user);
+        refreshTokenRepository.save(RefreshToken.builder()
+                .token(refreshToken)
+                .user(user)
+                .expiryDate(Instant.now().plusSeconds(60 * 60 * 24))
+                .build());
+
+        return  Map.of("accessToken" , accessToken, "refreshToken", refreshToken);
+    }
+
 }
