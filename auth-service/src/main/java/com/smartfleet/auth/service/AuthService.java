@@ -42,7 +42,7 @@ public class AuthService {
     }
 
     public Map<String, String> generateTokens(User user) {
-        String accessToken = jwtService.generateToken(String.valueOf(user.getEmail()),
+        String accessToken = jwtService.generateToken(user.getEmail(),
                 Map.of("role", user.getRole().name()));
         String refreshToken = UUID.randomUUID().toString();
 
