@@ -6,11 +6,23 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class JWTService {
     private final static String SECRET_KEY="superstrongsecretkeythatshouldbeatleast32chars";
     private Key getSigingKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    }
+
+    public String generateToken(String email, Map<String, Object> claims) {
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(email)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 50))
+                .signWith(getSigingKey(), SignatureAlgorithm.HS256)
+                .compact();
+
     }
 }
