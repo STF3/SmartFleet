@@ -29,8 +29,16 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if(!passwordEncoder.matches(rawPassword, user.getPassword()))
             throw new RuntimeException("Invalid Credentials");
-
         return generateTokens(user);
+    }
+
+    public Map<String, String> refresh(String token) {
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+        if(refreshToken.getExpiryDate().isBefore(Instant.now()))
+            throw new RuntimeException("Token expired");
+
+        return generateTokens(refreshToken.getUser());
     }
 
 }
