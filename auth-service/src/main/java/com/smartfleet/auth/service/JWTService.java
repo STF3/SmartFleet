@@ -23,6 +23,20 @@ public class JWTService {
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 50))
                 .signWith(getSigingKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
 
+    public String extractEmail(String token) {
+        return Jwts.parserBuilder().setSigningKey(getSigingKey())
+                .build().parseClaimsJws(token).getBody().getSubject();
+    }
+
+    public boolean isValid(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(getSigingKey())
+                    .build().parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
