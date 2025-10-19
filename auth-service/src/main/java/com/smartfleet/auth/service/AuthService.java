@@ -1,8 +1,7 @@
 package com.smartfleet.auth.service;
 
 import com.smartfleet.auth.model.*;
-import com.smartfleet.auth.repository.RefreshTokenRepository;
-import com.smartfleet.auth.repository.UserRepository;
+import com.smartfleet.auth.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -12,48 +11,43 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-
-    private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final UserRepository userRepo;
+    private final RefreshTokenRepository tokenRepo;
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
 
     public Map<String, String> register(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-        return generateTokens(user);
+        userRepo.save(user);
+        User saved = userRepo.findByEmail(user.getEmail()).orElseThrow();
+        return generateTokens(saved);
     }
 
-    public Map<String, String> login(String email, String rawPassword) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        if(!passwordEncoder.matches(rawPassword, user.getPassword()))
-            throw new RuntimeException("Invalid Credentials");
+    public Map<String, String> login(String email, String password) {
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+        if (!passwordEncoder.matches(password, user.getPassword()))
+            throw new RuntimeException("Invalid credentials");
         return generateTokens(user);
     }
 
     public Map<String, String> refresh(String token) {
-        RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
-        if(refreshToken.getExpiryDate().isBefore(Instant.now()))
+        RefreshToken refresh = tokenRepo.find(token)
+                .orElseThrow(() -> new RuntimeException("Invalid token"));
+        if (refresh.getExpiryDate().isBefore(Instant.now()))
             throw new RuntimeException("Token expired");
 
-        return generateTokens(refreshToken.getUser());
+        User user = userRepo.findByEmail(getEmailFromToken(token)).orElseThrow();
+        return generateTokens(user);
     }
 
-    public Map<String, String> generateTokens(User user) {
-        String accessToken = jwtService.generateToken(user.getEmail(),
-                Map.of("role", user.getRole().name()));
-        String refreshToken = UUID.randomUUID().toString();
-
-        refreshTokenRepository.deleteByUser(user);
-        refreshTokenRepository.save(RefreshToken.builder()
-                .token(refreshToken)
-                .user(user)
-                .expiryDate(Instant.now().plusSeconds(60 * 60 * 24))
-                .build());
-
-        return  Map.of("accessToken" , accessToken, "refreshToken", refreshToken);
+    private Map<String, String> generateTokens(User user) {
+        String accessToken = jwtService.generateToken(user.getEmail(), Map.of("role", user.getRole()));
+        RefreshToken refreshToken = tokenRepo.create(user.getId());
+        return Map.of("accessToken", accessToken, "refreshToken", refreshToken.getToken());
     }
 
+    private String getEmailFromToken(String token) {
+        return jwtService.extractEmail(token);
+    }
 }
