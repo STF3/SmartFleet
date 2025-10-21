@@ -54,7 +54,7 @@ jobs:
           done
       - name: Build and test auth-service
         working-directory: ./auth-service
-        run: ./gradlew clean test --no-daemon
+        run: chmod +x gradlew ./gradlew clean test --no-daemon
 
       - name: Upload test reports (if failed)
         if: failure()
