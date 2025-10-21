@@ -50,6 +50,6 @@ class AuthControllerTest {
         mockMvc.perform(post("/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
-                .andExpect(status().is5xxServerError()); // since we throw RuntimeException
+                .andExpect(status().isUnauthorized()); // since we throw RuntimeException
     }
 }
