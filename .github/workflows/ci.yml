@@ -41,20 +41,19 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-gradle-
 
-      - name: Build and test auth-service
-        working-directory: ./auth-service
-        run: ./gradlew clean test --no-daemon
-
       - name: Wait for MySQL to be ready
         run: |
           for i in {1..20}; do
-            nc -z 127.0.0.1 3306 && echo "MySQL is up!" && break
-            echo "Waiting for MySQL..."
+            nc -z 127.0.0.1 3306 && echo "✅ MySQL is up!" && break
+            echo "⏳ Waiting for MySQL..."
             sleep 3
           done
+
       - name: Build and test auth-service
         working-directory: ./auth-service
-        run: chmod +x gradlew ./gradlew clean test --no-daemon
+        run: |
+          chmod +x gradlew
+          ./gradlew clean test --no-daemon
 
       - name: Upload test reports (if failed)
         if: failure()
