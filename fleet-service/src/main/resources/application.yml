@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: fleet-service
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/fleetdb
+server:
+  port: 8082
