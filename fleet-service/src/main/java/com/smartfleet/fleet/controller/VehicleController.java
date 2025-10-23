@@ -21,6 +21,7 @@ public class VehicleController {
         return service.getAllVehicles();
     }
 
+    @PostMapping
     public Vehicle create(@RequestBody Vehicle vehicle) {
         return service.addVehicle(vehicle);
     }
