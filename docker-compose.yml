@@ -1,4 +1,4 @@
-version: '3.8'
+#version: '3.8'
 services:
   mysql:
     image: mysql:8.0
@@ -8,14 +8,31 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data:/var/lib//mysql
+      - mysql_data:/var/lib/mysql
   mongodb:
     image: mongo:6.0
     container_name: smartfleet-mongo
     ports:
       - "27017:27017"
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - mongo_data:/data/db
+  fleet-service:
+    build:
+      context: .
+      dockerfile: ./fleet-service/Dockerfile
+    container_name: fleet-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/fleetdb
+    depends_on:
+      mongodb:
+        condition: service_healthy
 volumes:
   mysql_data:
   mongo_data:

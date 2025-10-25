@@ -24,8 +24,18 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
@@ -34,29 +44,34 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Cache Gradle packages
+      - name: Cache Gradle dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.gradle/caches
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: ${{ runner.os }}-gradle-
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      - name: Wait for MySQL to be ready
+      - name: Wait for databases to be ready
         run: |
+          echo "Waiting for MySQL and MongoDB to be healthy..."
           for i in {1..20}; do
-            nc -z 127.0.0.1 3306 && echo "✅ MySQL is up!" && break
-            echo "⏳ Waiting for MySQL..."
+            nc -z 127.0.0.1 3306 && nc -z 127.0.0.1 27017 && echo "✅ Databases ready!" && break
+            echo "Waiting..."
             sleep 3
           done
 
-      - name: Build and test auth-service
-        run: |
-          chmod +x gradlew
-          ./gradlew :auth-service:clean :auth-service:test --no-daemon
+      - name: Make Gradle executable
+        run: chmod +x gradlew
 
-      - name: Upload test reports (if failed)
+      - name: Build and test all services
+        run: ./gradlew clean test --no-daemon
+
+      - name: Upload test reports (on failure)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
-          path: auth-service/build/reports/tests/test
+          path: '**/build/reports/tests/test'
