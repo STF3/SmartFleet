@@ -1,4 +1,4 @@
-package com.smartfleet.model;
+package com.smartfleet.delivery.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
